@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -24,9 +25,6 @@ import java.util.List;
 public class TweetController {
     @Autowired
     TweetService tweetService;
-
-    @Autowired
-    UserService userService;
 
     @Configuration
     public static class MyPicConfig implements WebMvcConfigurer {
@@ -50,16 +48,12 @@ public class TweetController {
     @PostMapping("/publish")
     public Object publishTweet(HttpServletRequest req) {
         try {
-            Tweet tweet = new Tweet(
-                    null,
-                    req.getParameter("content"),
-                    req.getParameter("picture"),
-                    req.getParameter("position"),
-                    req.getParameter("time"),
-                    req.getParameter("followers"),
-                    req.getParameter("author")
-            );
-            return new SuccessMessage<Boolean>("发表成功", tweetService.addTweet(tweet)).getMessage();
+            String account = req.getParameter("account");
+            String content = req.getParameter("content");
+            String position = req.getParameter("position");
+            String image = req.getParameter("image");
+            if (account == null || content == null || position == null) return new ErrorMessage("参数缺失").getMessage();
+            return new SuccessMessage<Boolean>("发表成功", tweetService.publishTweet(account, content, position, image)).getMessage();
         } catch (Exception e) {
             System.out.println(e);
             return new ErrorMessage("发表推文失败").getMessage();
